@@ -1,6 +1,6 @@
 {
   "name": "my-pwa-app",
-  "homepage": "https://github.com/erivni/hyperchat",
+  "homepage": "https://erivni.github.io/hyperchat",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
