@@ -20,7 +20,6 @@ class Client extends EventEmitter {
 
         this.handleConnectionStateChange = this.handleConnectionStateChange.bind(this);
         this.handleIceCandidate = this.handleIceCandidate.bind(this);
-        this.handleDataChannelMessage = this.handleDataChannelMessage.bind(this);
 
         this.sendChatMessage = this.sendChatMessage.bind(this);
         this.sendDataChannelMessage = this.sendDataChannelMessage.bind(this);
@@ -44,20 +43,19 @@ class Client extends EventEmitter {
         this.dataChannel = this.peerConnection.createDataChannel('hyperscale', dataChannelOptions);
 
         this.dataChannel.onopen = () => {
-            this.emitLogEvent('dataChannel has opened')
+            console.log('dataChannel has opened')
         }
-        this.dataChannel.onclose = () => this.emitLogEvent('dataChannel has closed')
-        this.dataChannel.onmessage = this.handleDataChannelMessage;
+        this.dataChannel.onclose = () => console.log('dataChannel has closed')
 
         this.peerConnection.onconnectionstatechange = this.handleConnectionStateChange
         this.peerConnection.onicecandidate = this.handleIceCandidate
-        this.peerConnection.createOffer().then(d => this.peerConnection.setLocalDescription(d)).catch(this.emitLogEvent);
+        this.peerConnection.createOffer().then(d => this.peerConnection.setLocalDescription(d)).catch(console.log);
         // console.log(this.peerConnection);
     }
 
     async getAnswer(connectionId) {
         try {
-            this.emitLogEvent("trying to get answer..");
+            console.log("trying to get answer..");
 
             let response = await fetch(`${this.signalingServer}/signaling/1.0/connections/${connectionId}/debug-answer`, {
                 method: 'get',
@@ -65,19 +63,19 @@ class Client extends EventEmitter {
 
             let body = await response.text();
             if (response.ok && body !== "") {
-                this.emitLogEvent(`got answer for connectionId ${connectionId}. setting remote description`);
+                console.log(`got answer for connectionId ${connectionId}. setting remote description`);
                 let answer = JSON.parse(body);
                 this.pluginId = answer?.pluginId;
-                this.emitLogEvent(`got plugin id ${this.pluginId}. setting remote description`);
+                console.log(`got plugin id ${this.pluginId}. setting remote description`);
                 await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-                this.emitLogEvent("after setting remote description");
+                console.log("after setting remote description");
                 return;
             }
-            this.emitLogEvent(`failed to get answer error: ${response.status}, ${body}`)
+            console.log(`failed to get answer error: ${response.status}, ${body}`)
             // if failed to get positive response, try again in a second
             setTimeout(() => this.getAnswer(connectionId), 1000)
         } catch (e) {
-            this.emitLogEvent(e)
+            console.log(e)
         }
     }
 
@@ -102,7 +100,7 @@ class Client extends EventEmitter {
         if (this.peerConnection && event.candidate === null) {
             let offer = Object.assign({}, this.peerConnection.localDescription.toJSON());
             offer.deviceId = this.deviceId;
-            offer.pluginType = "cso";
+            offer.pluginType = "remote-control";
 
             let connectionId = await this.sendOffer(offer);
             if (connectionId) {
@@ -112,16 +110,6 @@ class Client extends EventEmitter {
         }
     }
 
-    handleDataChannelMessage(event) {
-        const { data } = event
-        if (!data) {
-            return
-        }
-
-        // console.log("dataChannelMessage:", data, this.isDataJsonFormat(data));
-        this.emitLogEvent(`Message from data channel '${this.dataChannel.label}': ${data}`);
-    }
-
     sendChatMessage(message, width, height) {
         message = message.replace('data:image/png;base64,', '')
         const data = {
@@ -129,6 +117,7 @@ class Client extends EventEmitter {
             width,
             height,
             message,
+            duration: 4000
         }
         console.log(data)
         this.sendDataChannelMessage(JSON.stringify(data))
@@ -138,42 +127,37 @@ class Client extends EventEmitter {
         if (this.dataChannel && this.dataChannel.readyState === "open") {
             try {
                 this.dataChannel.send(message);
-                this.emitLogEvent(`Message to data channel '${this.dataChannel.label}': ${message}`);
+                console.log(`Message to data channel '${this.dataChannel.label}': ${message}`);
             }
             catch (e) {
-                this.emitLogEvent(`Message to data channel '${this.dataChannel.label}: failed to send message - ${e}`);
+                console.log(`Message to data channel '${this.dataChannel.label}: failed to send message - ${e}`);
             }
         } else {
-            this.emitLogEvent("data channel is not open for message " + message)
+            console.log("data channel is not open for message " + message)
         }
     }
 
     async sendOffer(offer) {
         try {
             let connectionId;
-            if (!this.connectionId) { // if connection id does not exist, it was not set by user
-                // get connectionId by deviceId
-                const response = await fetch(`${this.signalingServer}/signaling/1.0/connections?deviceId=${this.deviceId}`, {
-                    method: 'get',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                const body = await response.text();
-                if (body !== "") {
-                    let jsonBody = JSON.parse(body);
-                    if (jsonBody.error) {
-                        this.emitLogEvent(`failed to get connection id for device ${this.deviceId}: ${body}`);
-                        return;
-                    }
-                    connectionId = JSON.parse(body).connectionId;
+            // get connectionId by deviceId
+            const response = await fetch(`${this.signalingServer}/signaling/1.0/connections?deviceId=${this.deviceId}`, {
+                method: 'get',
+                headers: {
+                    'Accept': 'application/json'
                 }
-
-                this.emitLogEvent(`got connectionId ${connectionId} from device id ${this.deviceId}`);
-            } else {
-                connectionId = this.connectionId
-                this.emitLogEvent(`connectionId is set. using connectionId ${this.connectionId} instead of deviceId`);
+            });
+            let body = await response.text();
+            if (body !== "") {
+                let jsonBody = JSON.parse(body);
+                if (jsonBody.error) {
+                    console.log(`failed to get connection id for device ${this.deviceId}: ${body}`);
+                    return;
+                }
+                connectionId = JSON.parse(body).connectionId;
             }
+
+            console.log(`got connectionId ${connectionId} from device id ${this.deviceId}`);
 
             // send offer to signaling server
             let sendOfferResponse = await fetch(`${this.signalingServer}/signaling/1.0/connections/${connectionId}/debug-offer`, {
@@ -185,16 +169,16 @@ class Client extends EventEmitter {
             })
 
             if (sendOfferResponse.status !== 201) {
-                this.emitLogEvent(`error putting debug offer: ${sendOfferResponse.statusText}`)
+                console.log(`error putting debug offer: ${sendOfferResponse.statusText}`)
                 return;
             }
 
-            const body = await sendOfferResponse.text()
+            body = await sendOfferResponse.text()
 
-            this.emitLogEvent(`finished posting debug offer. response: ${sendOfferResponse.status} ${body}`);
+            console.log(`finished posting debug offer. response: ${sendOfferResponse.status} ${body}`);
             return connectionId;
         } catch (e) {
-            this.emitLogEvent(`error sending debug offer: ${e.toString()}`)
+            console.log(`error sending debug offer: ${e.toString()}`)
             return;
         }
     }

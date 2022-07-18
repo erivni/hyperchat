@@ -93,12 +93,13 @@ form input[type="checkbox"] {
 }
 
 .bubble {
+  --bubble-color: lightyellow;
   padding: 20px;
   display: inline-block;
   position: relative;
   width: 200px;
   height: auto;
-  background-color: lightcoral;
+  background-color: var(--bubble-color);
   border-radius: 10px;
   margin: 20px;
 }
@@ -111,7 +112,7 @@ form input[type="checkbox"] {
   height: 0;
   border-bottom: var(--size) solid transparent;
   border-right: var(--size) solid transparent;
-  border-left: var(--size) solid lightcoral;
+  border-left: var(--size) solid var(--bubble-color);
 }
 
 .remote {

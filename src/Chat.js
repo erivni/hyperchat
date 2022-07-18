@@ -2,14 +2,16 @@ import html2canvas from 'html2canvas';
 import React, { useEffect, useState } from 'react'
 import WebRtcClient from "./webRtcClient";
 
+const DEFAULT_MESSAGE = "your message will appear here!"
+
 
 export default function Chat() {
-    const [message, setMessage] = useState("your message will appear here!");
+    const [message, setMessage] = useState(DEFAULT_MESSAGE);
     useEffect(() => {
-        if (!message) return;
+        if (!message || message === DEFAULT_MESSAGE) return;
         html2canvas(document.getElementById("message-bubble"), {
             backgroundColor: null,
-            scale: 1
+            scale: 1.5
         }).then((canvas) => {
             const info = canvas.toDataURL();
             console.log(info);
@@ -27,7 +29,7 @@ export default function Chat() {
         <div className="screen m-screen">
             <div id="message-bubble" className="message bubble">
                 <div className="bubble-point"></div>
-                {message}
+                <b>{message}</b>
             </div>
             <form onSubmit={onMessageSend}>
                 <input name="message" type="text" />
