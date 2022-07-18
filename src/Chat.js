@@ -1,5 +1,6 @@
 import html2canvas from 'html2canvas';
 import React, { useEffect, useState } from 'react'
+import Close from './Close';
 import WebRtcClient from "./webRtcClient";
 
 const DEFAULT_MESSAGE = "your message will appear here!"
@@ -35,6 +36,7 @@ export default function Chat() {
                 <input name="message" type="text" />
                 <input type="submit" hidden />
             </form>
+            <Close />
         </div >
     )
 }
