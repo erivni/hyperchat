@@ -29,7 +29,6 @@ export default function Chat() {
     return (
         <div className="screen m-screen">
             <div id="message-bubble" className="message bubble">
-                <div className="bubble-point"></div>
                 <b>{message}</b>
             </div>
             <form onSubmit={onMessageSend}>
