@@ -4,7 +4,7 @@ import WebRtcClient from './webRtcClient';
 export default function Home() {
     const connectToWebRtc = (e) => {
         e.preventDefault()
-    e.stopPropagation() 
+        e.stopPropagation()
         const formData = new FormData(e.target);
         WebRtcClient.initialize(formData.get('deviceId'), null, "http://signaling.hyperscale.coldsnow.net:9090", formData.get('useStun'))
     }
