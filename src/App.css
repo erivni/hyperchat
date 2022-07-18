@@ -1,0 +1,162 @@
+:root {
+  --base-size: 30px;
+  --m-p-size: 5px;
+  --remote-arrow-color: #7a7a7a;
+  --remote-border-width: 5px;
+  --background-effect: #4287f5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+*.hidden {
+  visibility: collapse;
+  display: none;
+}
+
+body,
+html,
+#root {
+  width: 100vw;
+  height: 100vh;
+  /* overflow: hidden; */
+  font-family: "Montserrat", sans-serif;
+}
+
+.header {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  margin-top: calc(var(--m-p-size) * 2);
+}
+
+.footer {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  bottom: 0;
+  margin-bottom: calc(var(--m-p-size) * 2);
+}
+
+.footer > button {
+  outline: none;
+  background: none;
+  font-size: 1.17em;
+  font-weight: bold;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  height: max-content;
+  border: none;
+  width: 100%;
+}
+
+.screen {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  place-items: center;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding-bottom: 50px;
+}
+
+form {
+  display: grid;
+  flex-direction: row;
+  gap: calc(var(--m-p-size) * 2);
+}
+
+form > input {
+  padding: var(--m-p-size);
+  font-size: calc(var(--base-size) / 1.5);
+}
+
+form > label {
+  display: flex;
+  align-items: center;
+  gap: var(--m-p-size);
+}
+
+form label,
+form input[type="checkbox"] {
+  font-size: calc(var(--base-size) / 1.6);
+}
+
+.bubble {
+  --bubble-color: lightyellow;
+  padding: 20px;
+  display: inline-block;
+  position: relative;
+  width: 200px;
+  height: auto;
+  background-color: var(--bubble-color);
+  border-radius: 10px;
+  margin: 20px;
+}
+
+@keyframes keyPressAnim {
+  to {
+    background-color: var(--background-effect);
+  }
+}
+
+/* .message {
+  display: grid;
+  flex-direction: row;
+  place-items: center;
+}
+
+.message > *:first-child {
+  margin-bottom: calc(var(--m-p-size) * 2);
+} */
+
+#spinner {
+  display: inline-block;
+  width: calc(var(--base-size) * 2);
+  height: calc(var(--base-size) * 2);
+  border: var(--m-p-size) solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: #000;
+  animation: spin 1s ease-in-out infinite;
+  -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@media (orientation: landscape) {
+  .remote {
+    grid-template-areas:
+      "navigation home"
+      "navigation back";
+  }
+
+  .navigation {
+    width: 65vmin;
+    height: 65vmin;
+  }
+  .button.home,
+  .button.back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
