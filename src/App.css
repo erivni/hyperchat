@@ -1,38 +1,265 @@
-.App {
-  text-align: center;
+:root {
+  --base-size: 30px;
+  --m-p-size: 5px;
+  --remote-arrow-color: #7a7a7a;
+  --remote-border-width: 5px;
+  --background-effect: #4287f5;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Montserrat", sans-serif;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+*.hidden {
+  visibility: collapse;
+  display: none;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+body,
+html,
+#root {
+  width: 100vw;
+  height: 100vh;
+  /* overflow: hidden; */
+  font-family: "Montserrat", sans-serif;
+}
+
+.header {
+  position: fixed;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  width: 100vw;
+  margin-top: calc(var(--m-p-size) * 2);
 }
 
-.App-link {
-  color: #61dafb;
+.footer {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  bottom: 0;
+  margin-bottom: calc(var(--m-p-size) * 2);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
+.footer > button {
+  outline: none;
+  background: none;
+  font-size: 1.17em;
+  font-weight: bold;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  height: max-content;
+  border: none;
+  width: 100%;
+}
+
+.screen {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  place-items: center;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding-bottom: 50px;
+}
+
+form {
+  display: grid;
+  flex-direction: row;
+  gap: calc(var(--m-p-size) * 2);
+}
+
+form > input {
+  padding: var(--m-p-size);
+  font-size: calc(var(--base-size) / 1.5);
+}
+
+form > label {
+  display: flex;
+  align-items: center;
+  gap: var(--m-p-size);
+}
+
+form label,
+form input[type="checkbox"] {
+  font-size: calc(var(--base-size) / 1.6);
+}
+
+.bubble {
+  padding: 20px;
+  display: inline-block;
+  position: relative;
+  width: 200px;
+  height: auto;
+  background-color: lightcoral;
+  border-radius: 10px;
+  margin: 20px;
+}
+.bubble-point {
+  --size: 20px;
+  position: absolute;
+  left: 0;
+  bottom: calc(var(--size) * -0.5);
+  width: 0;
+  height: 0;
+  border-bottom: var(--size) solid transparent;
+  border-right: var(--size) solid transparent;
+  border-left: var(--size) solid lightcoral;
+}
+
+.remote {
+  display: grid;
+  grid-template-columns: repeat(1fr, 2);
+  grid-template-areas:
+    "navigation navigation"
+    " back home ";
+}
+
+.back {
+  grid-area: back;
+  /* text-align: center; */
+}
+.home {
+  grid-area: home;
+  text-align: end;
+}
+.home > button,
+.back > button {
+  outline: none;
+  margin-left: calc(var(--m-p-size) * 2);
+  margin-right: calc(var(--m-p-size) * 2);
+  background: none;
+  color: var(--remote-arrow-color);
+  font-size: 4em;
+  border: none;
+}
+
+.navigation {
+  grid-area: navigation;
+  background-color: transparent;
+  border-radius: 100%;
+  width: 90vmin;
+  height: 90vmin;
+  position: relative;
+  overflow: hidden;
+  transform: rotate(45deg);
+  border: var(--remote-border-width) solid var(--remote-arrow-color);
+}
+
+.navigation > .button {
+  display: flex;
+  width: 50%;
+  height: 50%;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  outline: var(--remote-border-width) solid var(--remote-arrow-color);
+  overflow: hidden;
+  background: white;
+}
+
+.remote > .button:active,
+.navigation > .button:active {
+  animation: keyPressAnim 0.15s alternate 10ms;
+}
+
+.error {
+  --background-effect: #ffa99a;
+}
+
+@keyframes keyPressAnim {
   to {
-    transform: rotate(360deg);
+    background-color: var(--background-effect);
+  }
+}
+
+.button.select {
+  width: 45%;
+  height: 45%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 100%;
+  border: var(--remote-border-width) solid var(--remote-arrow-color);
+  outline: none;
+}
+
+.navigation > .button > button {
+  transform: rotate(-45deg);
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+.button.top {
+  top: 0;
+}
+.button.left {
+  left: 0;
+}
+.button.right {
+  right: 0;
+}
+.button.bottom {
+  bottom: 0;
+}
+
+/* .message {
+  display: grid;
+  flex-direction: row;
+  place-items: center;
+}
+
+.message > *:first-child {
+  margin-bottom: calc(var(--m-p-size) * 2);
+} */
+
+#spinner {
+  display: inline-block;
+  width: calc(var(--base-size) * 2);
+  height: calc(var(--base-size) * 2);
+  border: var(--m-p-size) solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: #000;
+  animation: spin 1s ease-in-out infinite;
+  -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@media (orientation: landscape) {
+  .remote {
+    grid-template-areas:
+      "navigation home"
+      "navigation back";
+  }
+
+  .navigation {
+    width: 65vmin;
+    height: 65vmin;
+  }
+  .button.home,
+  .button.back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
