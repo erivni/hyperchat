@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/hyperchat/static/css/main.5aba832d.css",
+    "main.js": "/hyperchat/static/js/main.b85d06c8.js",
+    "static/js/787.7330cff1.chunk.js": "/hyperchat/static/js/787.7330cff1.chunk.js",
+    "service-worker.js": "/hyperchat/service-worker.js",
+    "index.html": "/hyperchat/index.html",
+    "main.5aba832d.css.map": "/hyperchat/static/css/main.5aba832d.css.map",
+    "main.b85d06c8.js.map": "/hyperchat/static/js/main.b85d06c8.js.map",
+    "787.7330cff1.chunk.js.map": "/hyperchat/static/js/787.7330cff1.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5aba832d.css",
+    "static/js/main.b85d06c8.js"
+  ]
+}
