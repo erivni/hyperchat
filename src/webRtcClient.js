@@ -1,5 +1,3 @@
-import { events, connectionStates } from '@constants';
-
 const EventEmitter = require('events');
 
 const dataChannelOptions = {
@@ -20,27 +18,12 @@ class Client extends EventEmitter {
 
         this.initialize = this.initialize.bind(this);
 
-        this.emitStatEvent = this.emitStatEvent.bind(this);
-        this.emitCurrentStatEvent = this.emitCurrentStatEvent.bind(this);
-        this.emitLogEvent = this.emitLogEvent.bind(this);
-        this.emitConfigurationEvent = this.emitConfigurationEvent.bind(this);
-        this.emitProfilesEvent = this.emitProfilesEvent.bind(this);
-
-        this.getAllStats = this.getAllStats.bind(this);
-        this.getCurrentStats = this.getCurrentStats.bind(this);
-        this.getConfig = this.getConfig.bind(this);
-        this.getProfiles = this.getProfiles.bind(this);
-        this.getAnswer = this.getAnswer.bind(this);
-
         this.handleConnectionStateChange = this.handleConnectionStateChange.bind(this);
         this.handleIceCandidate = this.handleIceCandidate.bind(this);
-        this.handleTrack = this.handleTrack.bind(this);
         this.handleDataChannelMessage = this.handleDataChannelMessage.bind(this);
 
         this.sendChatMessage = this.sendChatMessage.bind(this);
         this.sendDataChannelMessage = this.sendDataChannelMessage.bind(this);
-        this.sendJsonConfigUpdate = this.sendJsonConfigUpdate.bind(this);
-        this.sendDebugVideoMsg = this.sendDebugVideoMsg.bind(this);
         this.sendOffer = this.sendOffer.bind(this);
 
         this.removeListeners = this.removeListeners.bind(this);
@@ -62,17 +45,12 @@ class Client extends EventEmitter {
 
         this.dataChannel.onopen = () => {
             this.emitLogEvent('dataChannel has opened')
-            this.emit(events.DATA_CHANNEL_OPEN, "")
         }
         this.dataChannel.onclose = () => this.emitLogEvent('dataChannel has closed')
         this.dataChannel.onmessage = this.handleDataChannelMessage;
 
-        this.peerConnection.ontrack = this.handleTrack
         this.peerConnection.onconnectionstatechange = this.handleConnectionStateChange
         this.peerConnection.onicecandidate = this.handleIceCandidate
-        this.peerConnection.addTransceiver('video', { 'direction': 'sendrecv' })
-        this.peerConnection.addTransceiver('video', { 'direction': 'sendrecv' })
-        this.peerConnection.addTransceiver('audio', { 'direction': 'sendrecv' })
         this.peerConnection.createOffer().then(d => this.peerConnection.setLocalDescription(d)).catch(this.emitLogEvent);
         // console.log(this.peerConnection);
     }
@@ -107,16 +85,17 @@ class Client extends EventEmitter {
         let newConnectionState;
         switch (this.peerConnection.connectionState) {
             case "connected":
-                newConnectionState = connectionStates.CONNECTED;
+                newConnectionState = "CONNECTED";
                 break;
             case "disconnected":
             case "failed":
             case "closed":
-                newConnectionState = connectionStates.DISCONNECTED;
+                newConnectionState = "DISCONNECTED";
                 break;
             default:
-                newConnectionState = connectionStates.PENDING;
+                newConnectionState = "PENDING";
         }
+        console.log(`connection state changed to ${newConnectionState}`)
     }
 
     async handleIceCandidate(event) {
@@ -131,15 +110,6 @@ class Client extends EventEmitter {
                 this.getAnswer(connectionId);
             }
         }
-    }
-
-    handleTrack(event) {
-        // console.log("handleTrack", event)
-        if (event.track.kind === 'audio') {
-            return;
-        }
-        this.emitLogEvent("got track event " + JSON.stringify(event));
-        this.emit(events.STREAM_UPDATE, { src: event.streams[0], type: event.streams[0].id })
     }
 
     handleDataChannelMessage(event) {
@@ -215,7 +185,7 @@ class Client extends EventEmitter {
             })
 
             if (sendOfferResponse.status !== 201) {
-                this.emitLogEvent(`error putting debug offer: ${response.statusText}`)
+                this.emitLogEvent(`error putting debug offer: ${sendOfferResponse.statusText}`)
                 return;
             }
 
