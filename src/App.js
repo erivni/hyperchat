@@ -13,12 +13,10 @@ function App() {
   const homeRef = useRef(null);
   const systemRef = useRef(null);
   const userRef = useRef(null);
-  const chatRef = useRef(null);;
-  const [closeButtonHidden, setCloseButtonHidden] = useState(true);
-  const [connectionClosed, setConnectionClosed] = useState(false);
+  const chatRef = useRef(null);
+  const [connectionClosed, setConnectionClosed] = useState(true);
   const onInitialization = () => {
     scrollToElement(systemRef);
-    setCloseButtonHidden(false);
     setConnectionClosed(false);
   }
   const scrollToElement = (elemRef) => {
@@ -36,7 +34,6 @@ function App() {
   }
   const onCloseComplete = () => {
     scrollToElement(homeRef)
-    setCloseButtonHidden(true)
     setConnectionClosed(true)
   }
   const onConnected = () => {
@@ -71,7 +68,7 @@ function App() {
         <User ref={userRef} onUserDataComplete={onUserDataComplete} />
         {/* <Capture /> */}
         <Chat connectionClosed={connectionClosed} ref={chatRef} />
-        <Close hidden={closeButtonHidden} />
+        <Close hidden={connectionClosed} />
       </UserDataProvider>
     </Fragment>
   );
