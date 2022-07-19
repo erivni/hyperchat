@@ -21,6 +21,7 @@ class Client extends EventEmitter {
         this.signalingServer = undefined;
         this.peerConnection = undefined;
         this.dataChannel = undefined;
+        this.getAnswerTimeout = undefined;
         this.pluginId = undefined;
         this.accessToken = undefined;
 
@@ -88,7 +89,7 @@ class Client extends EventEmitter {
             }
             console.log(`failed to get answer error: ${response.status}, ${body}`)
             // if failed to get positive response, try again in a second
-            setTimeout(() => this.getAnswer(connectionId), 1000)
+            this.getAnswerTimeout = setTimeout(() => this.getAnswer(connectionId), 1000)
         } catch (e) {
             console.log(e)
         }
@@ -286,6 +287,7 @@ class Client extends EventEmitter {
 
     disconnect() {
         console.log("closing connection")
+        clearTimeout(this.getAnswerTimeout)
         this.emitConnectionStatusMessage('closing connection', true)
         if (this.dataChannel) {
             this.dataChannel.close();
