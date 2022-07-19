@@ -43,8 +43,8 @@ function App() {
     scrollToElement(systemRef);
   }
   useEffect(() => {
-    WebRtcClient.addListener('CONNECTED', onConnected)
-    WebRtcClient.addListener('DISCONNECT', onInterruptMsg)
+    WebRtcClient.on('CONNECTED', onConnected)
+    WebRtcClient.on('DISCONNECT', onInterruptMsg)
   }, [])
 
   return (
