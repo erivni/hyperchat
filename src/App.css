@@ -23,6 +23,7 @@ html,
   width: 100vw;
   height: 100vh;
   /* overflow: hidden; */
+  overflow-x: hidden;
   font-family: "Montserrat", sans-serif;
 }
 
@@ -57,6 +58,11 @@ html,
   height: max-content;
   border: none;
   width: 100%;
+}
+
+.button {
+  padding: var(--m-p-size);
+  font-size: calc(var(--base-size) / 1.5);
 }
 
 .screen {
@@ -94,14 +100,51 @@ form input[type="checkbox"] {
 
 .bubble {
   --bubble-color: lightyellow;
-  padding: 20px;
-  display: inline-block;
+  padding: calc(var(--m-p-size) * 1.5);
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  row-gap: calc(var(--m-p-size) / 2);
+  column-gap: calc(var(--m-p-size) * 1.5);
   position: relative;
-  width: 200px;
-  height: auto;
-  background-color: var(--bubble-color);
-  border-radius: 10px;
   margin: 20px;
+  /* width: 200px;
+  height: auto;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  border: 1px solid black; */
+  overflow: hidden;
+  font-weight: bold;
+  font-size: smaller;
+}
+.bubble .text {
+  width: 200px;
+  padding: calc(var(--m-p-size) * 1.5);
+  height: auto;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  border: 1px solid black;
+}
+.bubble .message {
+  grid-column-start: 2;
+}
+.bubble .username {
+  text-transform: capitalize;
+  font-style: italic;
+  font-weight: lighter;
+}
+
+.profile-image {
+  --size: 40px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  overflow: hidden;
+}
+.profile-image img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 @keyframes keyPressAnim {
