@@ -67,8 +67,7 @@ export default function Capture({ onPictureCaptured }) {
         <div>
             <div className="camera">
                 <video width={width} height={height} ref={ref => videoRef = ref} id="video" onCanPlay={videoStreamStart}>Video stream not available.</video>
-                {/* <button onClick={takePicture} className='button'>Capture Profile Image</button> */}
-                <button onClick={takePicture} className='button'><i class="fa-solid fa-camera"></i></button>
+                <button onClick={takePicture} className='button'><i className="fa-solid fa-camera"></i></button>
             </div>
             <canvas width={width} height={height} className='hidden' ref={ref => canvasRef = ref} id="canvas">
             </canvas>
