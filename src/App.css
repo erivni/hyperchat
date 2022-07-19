@@ -163,6 +163,31 @@ form input[type="checkbox"] {
   margin-bottom: calc(var(--m-p-size) * 2);
 } */
 
+.spinner-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--m-p-size);
+}
+.spinner-container > i {
+  position: absolute;
+  animation: spin 2s linear infinite;
+  -webkit-animation: spin 2s linear infinite;
+}
+.spinner-container > i:nth-child(1) {
+  font-size: 20px;
+  top: -15px;
+  right: -10px;
+}
+.spinner-container > i:nth-child(2) {
+  font-size: 40px;
+}
+.spinner-container > i:nth-child(3) {
+  font-size: 30px;
+  top: -25px;
+  left: -15px;
+}
+
 #spinner {
   display: inline-block;
   width: calc(var(--base-size) * 2);

@@ -9,8 +9,13 @@ const System = forwardRef((props, ref) => {
     }, [])
     return (
         <div ref={ref} className="screen r-screen">
+            {showSpinner &&
+                <div className='spinner-container'>
+                    <i className="fa-solid fa-gear"></i>
+                    <i className="fa-solid fa-gear"></i>
+                    <i className="fa-solid fa-gear"></i>
+                </div>}
             {message}
-            {showSpinner && <div>spinner</div>}
         </div>
     )
 })
