@@ -12,7 +12,10 @@ const Close = ({ onCloseComplete, hidden }) => {
         return window.removeEventListener('beforeunload', WebRtcClient.disconnect);
     }, [])
     return (
-        hidden? null : <div className='footer'><button className="button" onClick={onClose}>Close</button></div>
+        hidden ? null :
+            <div className='footer'>
+                <button className="button" onClick={onClose}>close</button>
+            </div>
     )
 }
 export default Close
