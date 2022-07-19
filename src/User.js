@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react'
+import Capture from './Capture'
 import { useUserData } from './UserData'
 
 const User = forwardRef((props, ref) => {
@@ -21,7 +22,7 @@ const User = forwardRef((props, ref) => {
   }
   return (
     <div ref={ref} className="screen f-screen">
-      {/* <Capture onPictureCaptured={(pictureData) => picture = pictureData} /> */}
+      <Capture onPictureCaptured={(pictureData) => picture = pictureData} />
       <form onSubmit={onFormSubmitted}>
         <input name="username" type="text" placeholder='enter your name here' />
         <input type="submit" value="OK" />
