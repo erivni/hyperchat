@@ -6,6 +6,7 @@ const System = forwardRef((props, ref) => {
     const [showSpinner, setShowSpinner] = useState(true);
     useEffect(() => {
         WebRtcClient.on('CONNECTION_STATUS_MESSAGE', setMessage)
+        return () => WebRtcClient.off('CONNECTION_STATUS_MESSAGE', setMessage)
     }, [])
     return (
         <div ref={ref} className="screen r-screen">

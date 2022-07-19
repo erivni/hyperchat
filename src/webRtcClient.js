@@ -298,7 +298,6 @@ class Client extends EventEmitter {
     disconnect() {
         console.log("closing connection")
         this.emitConnectionStatusMessage('closing connection', true)
-        this.removeAllListeners();
         if (this.dataChannel) {
             this.dataChannel.close();
         }

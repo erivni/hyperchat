@@ -45,6 +45,11 @@ function App() {
   useEffect(() => {
     WebRtcClient.on('CONNECTED', onConnected)
     WebRtcClient.on('DISCONNECT', onInterruptMsg)
+    return () => {
+      WebRtcClient.off('CONNECTED', onConnected)
+      WebRtcClient.off('DISCONNECT', onInterruptMsg)
+
+    }
   }, [])
 
   return (
