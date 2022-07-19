@@ -43,9 +43,7 @@ class Client extends EventEmitter {
     }
 
     initialize(deviceId, connectionId, signalingServer, useStun) {
-        if (this.deviceId === deviceId) {
-            return; // handling in case initialize is called wth the same device id multiple times
-        }
+        this.emitConnectionStatusMessage('trying to connect')
         this.deviceId = deviceId;
         this.connectionId = connectionId
         this.signalingServer = SIGNALING_SERVER;
@@ -63,7 +61,6 @@ class Client extends EventEmitter {
         this.peerConnection.onconnectionstatechange = this.handleConnectionStateChange
         this.peerConnection.onicecandidate = this.handleIceCandidate
         this.peerConnection.createOffer().then(d => this.peerConnection.setLocalDescription(d)).catch(console.log);
-        // console.log(this.peerConnection);
     }
 
     async getAnswer(connectionId) {
@@ -98,6 +95,7 @@ class Client extends EventEmitter {
     }
 
     async getAccessToken() {
+        this.emitConnectionStatusMessage('getting access token')
         console.log(`Enabling authentication flow to get access token for device: ${this.deviceId}`);
 
         const authnUrl = `${AUTHN_SERVER}/authn/v1/client_assertion/${this.deviceId}`;
@@ -146,6 +144,7 @@ class Client extends EventEmitter {
         const authzResponseBody = await authzResponse.json();
         this.accessToken = authzResponseBody.access_token;
         if (!this.accessToken) {
+            this.emitConnectionStatusMessage("could not find access token", true)
             console.log(`response from authz does not include access_token`, true)
             console.error(`unable to get access token from authz status: ${authzResponse.status} response: ${authzResponseBody}`)
             return
@@ -154,6 +153,7 @@ class Client extends EventEmitter {
 
     handleConnectionStateChange(event) {
         let newConnectionState;
+        let connectionEnd = false;
         switch (this.peerConnection.connectionState) {
             case "connected":
                 newConnectionState = "CONNECTED";
@@ -163,7 +163,7 @@ class Client extends EventEmitter {
             case "failed":
             case "closed":
                 newConnectionState = "DISCONNECTED";
-                this.emitDisconnectEvent();
+                connectionEnd = true
                 break;
             case "connecting":
                 newConnectionState = "CONNECTING";
@@ -173,7 +173,10 @@ class Client extends EventEmitter {
                 break;
 
         }
-        this.emitConnectionStatusMessage(`CONNECTION CHANGED TO ${newConnectionState}`)
+        this.emitConnectionStatusMessage(`CONNECTION CHANGED TO ${newConnectionState}`, connectionEnd)
+        if (connectionEnd) {
+            this.emitDisconnectEvent();
+        }
 
         console.log(`connection state changed to ${newConnectionState}`)
     }
@@ -189,6 +192,7 @@ class Client extends EventEmitter {
             let connectionId = await this.sendOffer(offer);
             if (connectionId) {
                 this.connectionId = connectionId;
+                this.emitConnectionStatusMessage('trying to get an answer')
                 this.getAnswer(connectionId);
             }
         }
@@ -223,6 +227,7 @@ class Client extends EventEmitter {
 
     async sendOffer(offer) {
         try {
+            this.emitConnectionStatusMessage('finding your connection')
             let connectionId;
             // get connectionId by deviceId
             const response = await fetch(`${SIGNALING_SERVER}/signaling/1.0/connections?deviceId=${this.deviceId}`, {
@@ -263,6 +268,8 @@ class Client extends EventEmitter {
 
             body = await sendOfferResponse.text()
 
+            this.emitConnectionStatusMessage('posted debug offer')
+
             console.log(`finished posting debug offer. response: ${sendOfferResponse.status} ${body}`);
             return connectionId;
         } catch (e) {
@@ -275,8 +282,11 @@ class Client extends EventEmitter {
         this.removeAllListeners(eventName)
     }
 
-    emitConnectionStatusMessage(message) {
+    emitConnectionStatusMessage(message, interrupt = false) {
         this.emit('CONNECTION_STATUS_MESSAGE', message)
+        if (interrupt) {
+            this.emitDisconnectEvent()
+        }
     }
     emitConnectedEvent() {
         this.emit('CONNECTED', "")
@@ -287,6 +297,7 @@ class Client extends EventEmitter {
 
     disconnect() {
         console.log("closing connection")
+        this.emitConnectionStatusMessage('closing connection', true)
         this.removeAllListeners();
         if (this.dataChannel) {
             this.dataChannel.close();
