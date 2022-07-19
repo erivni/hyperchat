@@ -35,8 +35,8 @@ const Chat = forwardRef((props, ref) => {
     return (
         <div ref={ref} className="screen m-screen">
             <div id="message-bubble" className="message bubble">
-                <p className='profile-image'><img src={userData?.profileImage} /></p>
-                <div className='text' style={{"backgroundColor": userData?.color}}>
+                <p className='profile-image'><img alt='profile image' src={userData?.profileImage} /></p>
+                <div className='text' style={{ "backgroundColor": userData?.color }}>
                     <p className='username'>{userData?.username}</p>
                     <p className='message'>{message}</p>
                 </div>

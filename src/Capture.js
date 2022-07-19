@@ -73,7 +73,7 @@ export default function Capture({ onPictureCaptured }) {
             </canvas>
             <p>Your Profile Image:</p>
             <div className='profile-image'>
-                <img src={imageSrc} />
+                <img alt='profile image' src={imageSrc} />
             </div>
         </div>
     )
