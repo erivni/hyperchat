@@ -6,7 +6,6 @@ export default function Capture({ onPictureCaptured }) {
 
     const [height, setHeight] = useState(0);
     const [width, setWidth] = useState(120);
-    console.log(`height is set ${height}`)
 
     const [imageSrc, setImageSrc] = useState(DEFAULT_PROFILE_IMAGE);
 
@@ -20,14 +19,12 @@ export default function Capture({ onPictureCaptured }) {
         console.log(videoRef.videoHeight)
         if (!streaming) {
             let _height = videoRef?.videoHeight / (videoRef?.videoWidth / width);
-            console.log(`height is set ${_height}`)
 
             // Firefox currently has a bug where the height can't be read from
             // the video, so we will make assumptions if this happens.
 
             if (isNaN(_height)) {
                 _height = width / (4 / 3);
-                console.log(`height is set ${height}`)
             }
             setHeight(_height)
             streaming = true;
@@ -42,7 +39,6 @@ export default function Capture({ onPictureCaptured }) {
         const context = canvasRef.getContext('2d');
         console.log(context, width, height)
         if (width && height) {
-            console.log(`height is set ${height}`)
             context.drawImage(videoRef, 0, 0, width, height);
             const data = canvasRef.toDataURL('image/png');
             setImageSrc(data)
@@ -67,14 +63,13 @@ export default function Capture({ onPictureCaptured }) {
         <div>
             <div className="camera">
                 <video width={width} height={height} ref={ref => videoRef = ref} id="video" onCanPlay={videoStreamStart}>Video stream not available.</video>
-                {/* <button onClick={takePicture} className='button'>Capture Profile Image</button> */}
-                <button onClick={takePicture} className='button'><i class="fa-solid fa-camera"></i></button>
+                <button onClick={takePicture} className='button'><i className="fa-solid fa-camera"></i></button>
             </div>
             <canvas width={width} height={height} className='hidden' ref={ref => canvasRef = ref} id="canvas">
             </canvas>
             <p>Your Profile Image:</p>
             <div className='profile-image'>
-                <img src={imageSrc} />
+                <img alt='profile image' src={imageSrc} />
             </div>
         </div>
     )

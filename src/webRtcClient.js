@@ -21,6 +21,7 @@ class Client extends EventEmitter {
         this.signalingServer = undefined;
         this.peerConnection = undefined;
         this.dataChannel = undefined;
+        this.getAnswerTimeout = undefined;
         this.pluginId = undefined;
         this.accessToken = undefined;
 
@@ -43,9 +44,7 @@ class Client extends EventEmitter {
     }
 
     initialize(deviceId, connectionId, signalingServer, useStun) {
-        if (this.deviceId === deviceId) {
-            return; // handling in case initialize is called wth the same device id multiple times
-        }
+        this.emitConnectionStatusMessage('trying to connect')
         this.deviceId = deviceId;
         this.connectionId = connectionId
         this.signalingServer = SIGNALING_SERVER;
@@ -63,7 +62,6 @@ class Client extends EventEmitter {
         this.peerConnection.onconnectionstatechange = this.handleConnectionStateChange
         this.peerConnection.onicecandidate = this.handleIceCandidate
         this.peerConnection.createOffer().then(d => this.peerConnection.setLocalDescription(d)).catch(console.log);
-        // console.log(this.peerConnection);
     }
 
     async getAnswer(connectionId) {
@@ -91,13 +89,14 @@ class Client extends EventEmitter {
             }
             console.log(`failed to get answer error: ${response.status}, ${body}`)
             // if failed to get positive response, try again in a second
-            setTimeout(() => this.getAnswer(connectionId), 1000)
+            this.getAnswerTimeout = setTimeout(() => this.getAnswer(connectionId), 1000)
         } catch (e) {
             console.log(e)
         }
     }
 
     async getAccessToken() {
+        this.emitConnectionStatusMessage('getting access token')
         console.log(`Enabling authentication flow to get access token for device: ${this.deviceId}`);
 
         const authnUrl = `${AUTHN_SERVER}/authn/v1/client_assertion/${this.deviceId}`;
@@ -146,6 +145,7 @@ class Client extends EventEmitter {
         const authzResponseBody = await authzResponse.json();
         this.accessToken = authzResponseBody.access_token;
         if (!this.accessToken) {
+            this.emitConnectionStatusMessage("could not find access token", true)
             console.log(`response from authz does not include access_token`, true)
             console.error(`unable to get access token from authz status: ${authzResponse.status} response: ${authzResponseBody}`)
             return
@@ -153,28 +153,20 @@ class Client extends EventEmitter {
     }
 
     handleConnectionStateChange(event) {
-        let newConnectionState;
-        switch (this.peerConnection.connectionState) {
+        let newConnectionState = this.peerConnection.connectionState
+        let connectionEnd = false;
+        switch (newConnectionState) {
             case "connected":
-                newConnectionState = "CONNECTED";
                 this.emitConnectedEvent();
                 break;
             case "disconnected":
-            case "failed":
             case "closed":
-                newConnectionState = "DISCONNECTED";
-                this.emitDisconnectEvent();
-                break;
-            case "connecting":
-                newConnectionState = "CONNECTING";
-                break;
-            default:
-                newConnectionState = "PENDING";
+            case "failed":
+                connectionEnd = true
                 break;
 
         }
-        this.emitConnectionStatusMessage(`CONNECTION CHANGED TO ${newConnectionState}`)
-
+        this.emitConnectionStatusMessage(`CONNECTION CHANGED TO ${newConnectionState}`, connectionEnd)
         console.log(`connection state changed to ${newConnectionState}`)
     }
 
@@ -189,6 +181,7 @@ class Client extends EventEmitter {
             let connectionId = await this.sendOffer(offer);
             if (connectionId) {
                 this.connectionId = connectionId;
+                this.emitConnectionStatusMessage('trying to get an answer')
                 this.getAnswer(connectionId);
             }
         }
@@ -223,6 +216,7 @@ class Client extends EventEmitter {
 
     async sendOffer(offer) {
         try {
+            this.emitConnectionStatusMessage('finding your connection')
             let connectionId;
             // get connectionId by deviceId
             const response = await fetch(`${SIGNALING_SERVER}/signaling/1.0/connections?deviceId=${this.deviceId}`, {
@@ -237,6 +231,7 @@ class Client extends EventEmitter {
             if (body !== "") {
                 let jsonBody = JSON.parse(body);
                 if (jsonBody.error) {
+                    console.log("did not find an open connection for this device")
                     console.log(`failed to get connection id for device ${this.deviceId}: ${body}`);
                     return;
                 }
@@ -263,6 +258,8 @@ class Client extends EventEmitter {
 
             body = await sendOfferResponse.text()
 
+            this.emitConnectionStatusMessage('posted debug offer')
+
             console.log(`finished posting debug offer. response: ${sendOfferResponse.status} ${body}`);
             return connectionId;
         } catch (e) {
@@ -275,8 +272,11 @@ class Client extends EventEmitter {
         this.removeAllListeners(eventName)
     }
 
-    emitConnectionStatusMessage(message) {
-        this.emit('CONNECTION_STATUS_MESSAGE', message)
+    emitConnectionStatusMessage(message, interrupt = false, fatal = false) {
+        this.emit('CONNECTION_STATUS_MESSAGE', { message, interrupt, fatal })
+        if (fatal) {
+            this.emitDisconnectEvent()
+        }
     }
     emitConnectedEvent() {
         this.emit('CONNECTED', "")
@@ -287,7 +287,8 @@ class Client extends EventEmitter {
 
     disconnect() {
         console.log("closing connection")
-        this.removeAllListeners();
+        clearTimeout(this.getAnswerTimeout)
+        this.emitConnectionStatusMessage('closing connection', true)
         if (this.dataChannel) {
             this.dataChannel.close();
         }
@@ -295,6 +296,7 @@ class Client extends EventEmitter {
             this.peerConnection.close();
         }
         console.log("connection closed")
+        this.emitConnectionStatusMessage('connection closed', true, true)
     }
 }
 

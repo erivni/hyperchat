@@ -2,17 +2,16 @@ import React, { useEffect } from 'react'
 
 import WebRtcClient from './webRtcClient';
 
-const Close = ({ onCloseComplete, hidden }) => {
-    const onClose = () => {
-        WebRtcClient.disconnect()
-        onCloseComplete()
-    }
+const Close = ({ hidden }) => {
     useEffect(() => {
         window.addEventListener('beforeunload', WebRtcClient.disconnect)
         return window.removeEventListener('beforeunload', WebRtcClient.disconnect);
     }, [])
     return (
-        hidden? null : <div className='footer'><button className="button" onClick={onClose}>Close</button></div>
+        hidden ? null :
+            <div className='footer'>
+                <button className="button" onClick={WebRtcClient.disconnect}>close</button>
+            </div>
     )
 }
 export default Close

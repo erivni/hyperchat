@@ -3,13 +3,6 @@ import Capture from './Capture'
 import { useUserData } from './UserData'
 
 const User = forwardRef((props, ref) => {
-  /* 
-  TODO: 
-  ✔ get user picture
-  ✔ get user name
-  📃 decide color
-  */
-  
   const [_, updateUserData] = useUserData()
   const { onUserDataComplete } = props
   let picture = null;
@@ -17,7 +10,7 @@ const User = forwardRef((props, ref) => {
     e.preventDefault()
     const formData = new FormData(e.target)
     const username = formData.get('username')
-    updateUserData({ username: username, imageSrc: picture, color: '#f803fc' });
+    updateUserData({ username: username, imageSrc: picture, color: null });
     onUserDataComplete();
   }
   return (
