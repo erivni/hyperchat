@@ -15,9 +15,11 @@ function App() {
   const userRef = useRef(null);
   const chatRef = useRef(null);;
   const [closeButtonHidden, setCloseButtonHidden] = useState(true);
+  const [connectionClosed, setConnectionClosed] = useState(false);
   const onInitialization = () => {
     scrollToElement(systemRef);
     setCloseButtonHidden(false);
+    setConnectionClosed(false);
   }
   const scrollToElement = (elemRef) => {
     if (!elemRef) {
@@ -33,21 +35,29 @@ function App() {
     scrollToElement(chatRef)
   }
   const onCloseComplete = () => {
-    setCloseButtonHidden(true)
     scrollToElement(homeRef)
+    setCloseButtonHidden(true)
+    setConnectionClosed(true)
   }
   const onConnected = () => {
     scrollToElement(userRef)
   }
-  const onInterruptMsg = (msg) => {
-    scrollToElement(systemRef);
+  const onConnectionStatusMsg = ({ interrupt, fatal }) => {
+    if (interrupt) {
+      scrollToElement(systemRef);
+    }
+    if (fatal) {
+      scrollToElement(homeRef);
+    }
   }
   useEffect(() => {
     WebRtcClient.on('CONNECTED', onConnected)
-    WebRtcClient.on('DISCONNECT', onInterruptMsg)
+    WebRtcClient.on('DISCONNECT', onCloseComplete)
+    WebRtcClient.on('CONNECTION_STATUS_MESSAGE', onConnectionStatusMsg)
     return () => {
       WebRtcClient.off('CONNECTED', onConnected)
-      WebRtcClient.off('DISCONNECT', onInterruptMsg)
+      WebRtcClient.off('DISCONNECT', onCloseComplete)
+      WebRtcClient.off('CONNECTION_STATUS_MESSAGE', onConnectionStatusMsg)
 
     }
   }, [])
@@ -57,11 +67,11 @@ function App() {
       <UserDataProvider>
         <Header />
         <Home onInitialization={onInitialization} ref={homeRef} />
-        <System ref={systemRef} />
+        <System connectionClosed={connectionClosed} ref={systemRef} />
         <User ref={userRef} onUserDataComplete={onUserDataComplete} />
         {/* <Capture /> */}
-        <Chat ref={chatRef} />
-        <Close hidden={closeButtonHidden} onCloseComplete={onCloseComplete} />
+        <Chat connectionClosed={connectionClosed} ref={chatRef} />
+        <Close hidden={closeButtonHidden} />
       </UserDataProvider>
     </Fragment>
   );

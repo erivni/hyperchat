@@ -1,11 +1,12 @@
 import html2canvas from 'html2canvas';
-import React, { forwardRef, useState } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { useUserData } from './UserData';
 import WebRtcClient from "./webRtcClient";
 
 const DEFAULT_MESSAGE = "your message will appear here!"
 
 const Chat = forwardRef((props, ref) => {
+    const { connectionClosed } = props
     const [userData, _] = useUserData()
     const [message, setMessage] = useState(DEFAULT_MESSAGE);
 
@@ -20,6 +21,12 @@ const Chat = forwardRef((props, ref) => {
             WebRtcClient.sendChatMessage(info, canvas.width, canvas.height)
         });
     }
+
+    useEffect(() => {
+        if (connectionClosed) {
+            setMessage(DEFAULT_MESSAGE);
+        }
+    }, [connectionClosed])
 
     const onMessageChange = (e) => {
         setMessage(e.target.value)

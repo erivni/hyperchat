@@ -152,32 +152,20 @@ class Client extends EventEmitter {
     }
 
     handleConnectionStateChange(event) {
-        let newConnectionState;
+        let newConnectionState = this.peerConnection.connectionState
         let connectionEnd = false;
-        switch (this.peerConnection.connectionState) {
+        switch (newConnectionState) {
             case "connected":
-                newConnectionState = "CONNECTED";
                 this.emitConnectedEvent();
                 break;
             case "disconnected":
-            case "failed":
             case "closed":
-                newConnectionState = "DISCONNECTED";
+            case "failed":
                 connectionEnd = true
-                break;
-            case "connecting":
-                newConnectionState = "CONNECTING";
-                break;
-            default:
-                newConnectionState = "PENDING";
                 break;
 
         }
         this.emitConnectionStatusMessage(`CONNECTION CHANGED TO ${newConnectionState}`, connectionEnd)
-        if (connectionEnd) {
-            this.emitDisconnectEvent();
-        }
-
         console.log(`connection state changed to ${newConnectionState}`)
     }
 
@@ -242,6 +230,7 @@ class Client extends EventEmitter {
             if (body !== "") {
                 let jsonBody = JSON.parse(body);
                 if (jsonBody.error) {
+                    console.log("did not find an open connection for this device")
                     console.log(`failed to get connection id for device ${this.deviceId}: ${body}`);
                     return;
                 }
@@ -282,9 +271,9 @@ class Client extends EventEmitter {
         this.removeAllListeners(eventName)
     }
 
-    emitConnectionStatusMessage(message, interrupt = false) {
-        this.emit('CONNECTION_STATUS_MESSAGE', message)
-        if (interrupt) {
+    emitConnectionStatusMessage(message, interrupt = false, fatal = false) {
+        this.emit('CONNECTION_STATUS_MESSAGE', { message, interrupt, fatal })
+        if (fatal) {
             this.emitDisconnectEvent()
         }
     }
@@ -305,6 +294,7 @@ class Client extends EventEmitter {
             this.peerConnection.close();
         }
         console.log("connection closed")
+        this.emitConnectionStatusMessage('connection closed', true, true)
     }
 }
 
