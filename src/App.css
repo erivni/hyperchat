@@ -153,6 +153,10 @@ form input[type="checkbox"] {
   }
 }
 
+.system-message {
+  text-transform: lowercase;
+}
+
 /* .message {
   display: grid;
   flex-direction: row;

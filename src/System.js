@@ -16,7 +16,7 @@ const System = forwardRef((props, ref) => {
                     <i className="fa-solid fa-gear"></i>
                     <i className="fa-solid fa-gear"></i>
                 </div>}
-            {message}
+            <p className='system-message'>{message}</p>
         </div>
     )
 })
