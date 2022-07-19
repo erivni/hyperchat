@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/hyperchat/static/css/main.5aba832d.css",
-    "main.js": "/hyperchat/static/js/main.dfccb5c2.js",
-    "static/js/787.7330cff1.chunk.js": "/hyperchat/static/js/787.7330cff1.chunk.js",
-    "service-worker.js": "/hyperchat/service-worker.js",
-    "index.html": "/hyperchat/index.html",
-    "main.5aba832d.css.map": "/hyperchat/static/css/main.5aba832d.css.map",
-    "main.dfccb5c2.js.map": "/hyperchat/static/js/main.dfccb5c2.js.map",
-    "787.7330cff1.chunk.js.map": "/hyperchat/static/js/787.7330cff1.chunk.js.map"
+    "main.css": "/static/css/main.5aba832d.css",
+    "main.js": "/static/js/main.dfccb5c2.js",
+    "static/js/787.7330cff1.chunk.js": "/static/js/787.7330cff1.chunk.js",
+    "service-worker.js": "/service-worker.js",
+    "index.html": "/index.html",
+    "main.5aba832d.css.map": "/static/css/main.5aba832d.css.map",
+    "main.dfccb5c2.js.map": "/static/js/main.dfccb5c2.js.map",
+    "787.7330cff1.chunk.js.map": "/static/js/787.7330cff1.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.5aba832d.css",
