@@ -5,6 +5,13 @@ const dataChannelOptions = {
     maxPacketLifeTime: 3000, // in milliseconds
 };
 
+const AUTHN_SERVER = "https://authn.ingress.hyperscale.coldsnow.net"
+const AUTHZ_SERVER = "https://authz.ingress.hyperscale.coldsnow.net"
+const SIGNALING_SERVER = "https://signaling.ingress.hyperscale.coldsnow.net"
+
+const FCID = () => Math.round(Math.random() * 1000000).toString()
+
+
 class Client extends EventEmitter {
     constructor() {
         super();
@@ -15,8 +22,10 @@ class Client extends EventEmitter {
         this.peerConnection = undefined;
         this.dataChannel = undefined;
         this.pluginId = undefined;
+        this.accessToken = undefined;
 
         this.initialize = this.initialize.bind(this);
+        this.getAccessToken = this.getAccessToken.bind(this);
 
         this.emitConnectionStatusMessage = this.emitConnectionStatusMessage.bind(this);
         this.emitConnectedEvent = this.emitConnectedEvent.bind(this);
@@ -39,7 +48,7 @@ class Client extends EventEmitter {
         }
         this.deviceId = deviceId;
         this.connectionId = connectionId
-        this.signalingServer = signalingServer;
+        this.signalingServer = SIGNALING_SERVER;
         this.peerConnection = new RTCPeerConnection();
         if (useStun) {
             this.peerConnection.setConfiguration({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
@@ -63,6 +72,11 @@ class Client extends EventEmitter {
 
             let response = await fetch(`${this.signalingServer}/signaling/1.0/connections/${connectionId}/debug-answer`, {
                 method: 'get',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    flow_context: FCID()
+                }
             })
 
             let body = await response.text();
@@ -80,6 +94,61 @@ class Client extends EventEmitter {
             setTimeout(() => this.getAnswer(connectionId), 1000)
         } catch (e) {
             console.log(e)
+        }
+    }
+
+    async getAccessToken() {
+        console.log(`Enabling authentication flow to get access token for device: ${this.deviceId}`);
+
+        const authnUrl = `${AUTHN_SERVER}/authn/v1/client_assertion/${this.deviceId}`;
+        const authzUrl = `${AUTHZ_SERVER}/authz/v1/token`;
+        const fcid = FCID();
+
+        // start auth device flow
+        console.log(`Get client_assertion from authn: ${authnUrl}`);
+        const authnResponse = await fetch(authnUrl, {
+            method: 'get',
+            headers: {
+                flow_context: `${fcid}_authn`,
+            }
+        })
+        if (authnResponse.status !== 200) {
+            console.log(`unable to get client assertion from authn`, true)
+            console.error(`unable to get client assertion from authn status: ${authnResponse.status} response: ${authnResponse}`)
+            return
+        }
+        const authnResponseBody = await authnResponse.json();
+        const clientAssertion = authnResponseBody.client_assertion;
+        if (!clientAssertion) {
+            console.log(`response from authn does not include client_assertion`, true)
+            console.error(`unable to get client assertion from authn status: ${authnResponse.status} response: ${authnResponseBody}`)
+            return
+        }
+
+        console.log(`get access token from authz: ${authzUrl}`);
+
+        let authzResponse = await fetch(authzUrl, {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                flow_context: `${fcid}_authz`,
+            },
+            body: new URLSearchParams({
+                'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion': clientAssertion
+            })
+        })
+        if (authzResponse.status !== 200) {
+            console.log(`unable to get access token from authz`, true)
+            console.error(`unable to get access token from authz status: ${authzResponse.status} response: ${authzResponse}`)
+            return
+        }
+        const authzResponseBody = await authzResponse.json();
+        this.accessToken = authzResponseBody.access_token;
+        if (!this.accessToken) {
+            console.log(`response from authz does not include access_token`, true)
+            console.error(`unable to get access token from authz status: ${authzResponse.status} response: ${authzResponseBody}`)
+            return
         }
     }
 
@@ -114,6 +183,8 @@ class Client extends EventEmitter {
             let offer = Object.assign({}, this.peerConnection.localDescription.toJSON());
             offer.deviceId = this.deviceId;
             offer.pluginType = "remote-control";
+
+            await this.getAccessToken();
 
             let connectionId = await this.sendOffer(offer);
             if (connectionId) {
@@ -154,10 +225,12 @@ class Client extends EventEmitter {
         try {
             let connectionId;
             // get connectionId by deviceId
-            const response = await fetch(`${this.signalingServer}/signaling/1.0/connections?deviceId=${this.deviceId}`, {
+            const response = await fetch(`${SIGNALING_SERVER}/signaling/1.0/connections?deviceId=${this.deviceId}`, {
                 method: 'get',
                 headers: {
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    flow_context: FCID()
                 }
             });
             let body = await response.text();
@@ -177,6 +250,8 @@ class Client extends EventEmitter {
                 method: 'put',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    flow_context: FCID()
                 },
                 body: JSON.stringify(offer)
             })
