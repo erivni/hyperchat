@@ -1,6 +1,6 @@
 {
   "name": "my-pwa-app",
-  "homepage": "http://hyperscale-chat.coldsnow.net/hyperchat",
+  "homepage": "http://hyperscale-chat.coldsnow.net/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
