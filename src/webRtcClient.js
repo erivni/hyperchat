@@ -18,6 +18,10 @@ class Client extends EventEmitter {
 
         this.initialize = this.initialize.bind(this);
 
+        this.emitConnectionStatusMessage = this.emitConnectionStatusMessage.bind(this);
+        this.emitConnectedEvent = this.emitConnectedEvent.bind(this);
+        this.emitDisconnectEvent = this.emitDisconnectEvent.bind(this);
+
         this.handleConnectionStateChange = this.handleConnectionStateChange.bind(this);
         this.handleIceCandidate = this.handleIceCandidate.bind(this);
 
@@ -84,15 +88,24 @@ class Client extends EventEmitter {
         switch (this.peerConnection.connectionState) {
             case "connected":
                 newConnectionState = "CONNECTED";
+                this.emitConnectedEvent();
                 break;
             case "disconnected":
             case "failed":
             case "closed":
                 newConnectionState = "DISCONNECTED";
+                this.emitDisconnectEvent();
+                break;
+            case "connecting":
+                newConnectionState = "CONNECTING";
                 break;
             default:
                 newConnectionState = "PENDING";
+                break;
+
         }
+        this.emitConnectionStatusMessage(`CONNECTION CHANGED TO ${newConnectionState}`)
+
         console.log(`connection state changed to ${newConnectionState}`)
     }
 
@@ -110,14 +123,14 @@ class Client extends EventEmitter {
         }
     }
 
-    sendChatMessage(message, width, height) {
+    sendChatMessage(message, width, height, duration = 4000) {
         message = message.replace('data:image/png;base64,', '')
         const data = {
             type: "chat",
             width,
             height,
             message,
-            duration: 4000
+            duration
         }
         console.log(data)
         this.sendDataChannelMessage(JSON.stringify(data))
@@ -127,7 +140,7 @@ class Client extends EventEmitter {
         if (this.dataChannel && this.dataChannel.readyState === "open") {
             try {
                 this.dataChannel.send(message);
-                console.log(`Message to data channel '${this.dataChannel.label}': ${message}`);
+                // console.log(`Message to data channel '${this.dataChannel.label}': ${message}`);
             }
             catch (e) {
                 console.log(`Message to data channel '${this.dataChannel.label}: failed to send message - ${e}`);
@@ -185,6 +198,16 @@ class Client extends EventEmitter {
 
     removeListeners(eventName) {
         this.removeAllListeners(eventName)
+    }
+
+    emitConnectionStatusMessage(message) {
+        this.emit('CONNECTION_STATUS_MESSAGE', message)
+    }
+    emitConnectedEvent() {
+        this.emit('CONNECTED', "")
+    }
+    emitDisconnectEvent() {
+        this.emit('DISCONNECT', "")
     }
 
     disconnect() {
