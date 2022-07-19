@@ -1,15 +1,17 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import WebRtcClient from './webRtcClient';
 
-export default function Home() {
+const Home = forwardRef((props, ref) => {
+    const { onInitialization } = props
     const connectToWebRtc = (e) => {
         e.preventDefault()
         e.stopPropagation()
         const formData = new FormData(e.target);
         WebRtcClient.initialize(formData.get('deviceId'), null, "http://signaling.hyperscale.coldsnow.net:9090", formData.get('useStun'))
+        onInitialization();
     }
     return (
-        <div className="screen f-screen">
+        <div ref={ref} className="screen f-screen">
             <form onSubmit={connectToWebRtc}>
                 <input type="text" placeholder="your device id" id="deviceId" name="deviceId" />
                 <input type="submit" value="CONNECT" />
@@ -19,4 +21,5 @@ export default function Home() {
             </form>
         </div>
     )
-}
+})
+export default Home;
