@@ -42,15 +42,15 @@ const Chat = forwardRef((props, ref) => {
     return (
         <div ref={ref} className="screen m-screen">
             <div id="message-bubble" className="message bubble">
-                <p className='profile-image'><img alt='profile image' src={userData?.profileImage} /></p>
+                <p className='profile-image'><img alt='profile' src={userData?.profileImage} /></p>
                 <div className='text' style={{ "backgroundColor": userData?.color }}>
                     <p className='username'>{userData?.username}</p>
                     <p className='message'>{message}</p>
                 </div>
             </div>
-            <form onSubmit={onFormSubmitted}>
+            <form onSubmit={onFormSubmitted} style={{ flexDirection: "row" }}>
                 <input name="message" type="text" onChange={onMessageChange} />
-                <input type="submit" hidden />
+                <label><input type="submit" hidden /><i className="fa-solid fa-paper-plane"></i></label>
             </form>
         </div >
     )

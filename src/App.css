@@ -77,8 +77,8 @@ html,
 }
 
 form {
-  display: grid;
-  flex-direction: row;
+  display: flex;
+  flex-direction: column;
   gap: calc(var(--m-p-size) * 2);
 }
 
