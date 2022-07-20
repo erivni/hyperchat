@@ -3,7 +3,7 @@ import Capture from './Capture'
 import { useUserData } from './UserData'
 
 const User = forwardRef((props, ref) => {
-  const [_, updateUserData] = useUserData()
+  const [userData, updateUserData] = useUserData()
   const { onUserDataComplete } = props
   let picture = null;
   const onFormSubmitted = (e) => {
@@ -17,7 +17,7 @@ const User = forwardRef((props, ref) => {
     <div ref={ref} className="screen f-screen">
       <Capture onPictureCaptured={(pictureData) => picture = pictureData} />
       <form onSubmit={onFormSubmitted}>
-        <input name="username" type="text" placeholder='enter your name here' />
+        <input name="username" type="text" placeholder='enter your name here' defaultValue={userData?.username} />
         <input type="submit" value="OK" />
       </form>
     </div>
