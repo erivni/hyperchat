@@ -57,6 +57,11 @@ class Client extends EventEmitter {
         this.dataChannel.onopen = () => {
             console.log('dataChannel has opened')
         }
+        this.dataChannel.onmessage = (e) => {
+            console.log("Einav - ", e.data);
+
+            this.emit('MESSAGE', e.data);
+        }
         this.dataChannel.onclose = () => console.log('dataChannel has closed')
 
         this.peerConnection.onconnectionstatechange = this.handleConnectionStateChange
@@ -164,6 +169,8 @@ class Client extends EventEmitter {
             case "failed":
                 connectionEnd = true
                 break;
+            default:
+                break;
 
         }
         this.emitConnectionStatusMessage(`CONNECTION CHANGED TO ${newConnectionState}`, connectionEnd)
@@ -174,7 +181,7 @@ class Client extends EventEmitter {
         if (this.peerConnection && event.candidate === null) {
             let offer = Object.assign({}, this.peerConnection.localDescription.toJSON());
             offer.deviceId = this.deviceId;
-            offer.pluginType = "remote-control";
+            offer.pluginType = "chat";
 
             await this.getAccessToken();
 

@@ -98,6 +98,17 @@ form input[type="checkbox"] {
   font-size: calc(var(--base-size) / 1.6);
 }
 
+.history {
+  overflow: scroll;
+  width: auto;
+  height: 30%;
+  padding: 3%;
+}
+
+.history-message {
+  display: block;
+}
+
 .bubble {
   --bubble-color: lightyellow;
   padding: calc(var(--m-p-size) * 1.5);
