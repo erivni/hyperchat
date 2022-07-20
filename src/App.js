@@ -98,7 +98,7 @@ function App() {
         <Header />
         <Home onInitialization={onInitialization} ref={homeRef} />
         <System connectionClosed={connectionClosed} ref={systemRef} />
-        <User ref={userRef} onUserDataComplete={onUserDataComplete} />
+        <User connectionClosed={connectionClosed} ref={userRef} onUserDataComplete={onUserDataComplete} />
         {/* <Capture /> */}
         <Chat connectionClosed={connectionClosed} ref={chatRef} />
         <Close hidden={connectionClosed} />

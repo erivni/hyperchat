@@ -1,11 +1,11 @@
-import React, { forwardRef, useState } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import Capture from './Capture'
 import { useUserData } from './UserData'
 
 const User = forwardRef((props, ref) => {
   const [userData, updateUserData] = useUserData()
   const [done, setDone] = useState(false)
-  const { onUserDataComplete } = props
+  const { onUserDataComplete, connectionClosed } = props
   let picture = null;
   const onFormSubmitted = (e) => {
     e.preventDefault()
@@ -15,9 +15,13 @@ const User = forwardRef((props, ref) => {
     onUserDataComplete();
     setDone(true)
   }
+  useEffect(() => {
+    setDone(false)
+  }, [connectionClosed])
+  
   return (
     <div ref={ref} className="screen f-screen">
-      <Capture close={done} onPictureCaptured={(pictureData) => picture = pictureData} />
+      <Capture close={done || connectionClosed} onPictureCaptured={(pictureData) => picture = pictureData} />
       <form onSubmit={onFormSubmitted}>
         <input name="username" type="text" placeholder='enter your name here' defaultValue={userData?.username} />
         <input type="submit" value="OK" />

@@ -35,9 +35,9 @@ const Chat = forwardRef((props, ref) => {
         })
     }
     useEffect(() => {
-        if (!historyRef || !historyRef.current) {
-            return
-        }
+        if (!historyRef || !historyRef.current) return
+        if (!historyMsgs.length) return
+        
         historyRef.current.scrollTop = historyRef.current.scrollHeight
     }, [historyMsgs])
 
@@ -51,6 +51,7 @@ const Chat = forwardRef((props, ref) => {
     useEffect(() => {
         if (connectionClosed) {
             setMessage(DEFAULT_MESSAGE);
+            setHistoryMsgs([]);
         }
     }, [connectionClosed])
 
