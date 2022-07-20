@@ -9,16 +9,27 @@ import Close from './Close';
 import WebRtcClient from './webRtcClient';
 import { UserDataProvider } from './UserData';
 
+const Views = {
+  HOME: "HOME",
+  SYSTEM: "SYSTEM",
+  USER: "USER",
+  CHAT: "CHAT",
+}
+
 function App() {
   const homeRef = useRef(null);
   const systemRef = useRef(null);
   const userRef = useRef(null);
   const chatRef = useRef(null);
-  const [connectionClosed, setConnectionClosed] = useState(true);
-  const onInitialization = () => {
-    scrollToElement(systemRef);
-    setConnectionClosed(false);
+  const RefIDs = {
+    "HOME": homeRef,
+    "SYSTEM": systemRef,
+    "USER": userRef,
+    "CHAT": chatRef
   }
+  const [connectionClosed, setConnectionClosed] = useState(true);
+  const [currentViewId, setCurrentViewId] = useState(Views.HOME);
+
   const scrollToElement = (elemRef) => {
     if (!elemRef) {
       console.log("elemRef is null")
@@ -29,24 +40,39 @@ function App() {
     }
     elemRef.current.scrollIntoView({ behavior: "smooth" })
   }
+  const onInitialization = () => {
+    setCurrentViewId(Views.SYSTEM);
+    setConnectionClosed(false);
+  }
   const onUserDataComplete = () => {
-    scrollToElement(chatRef)
+    setCurrentViewId(Views.CHAT)
   }
   const onCloseComplete = () => {
-    scrollToElement(homeRef)
+    setCurrentViewId(Views.HOME)
     setConnectionClosed(true)
   }
   const onConnected = () => {
-    scrollToElement(userRef)
+    setCurrentViewId(Views.USER)
   }
   const onConnectionStatusMsg = ({ interrupt, fatal }) => {
     if (interrupt) {
-      scrollToElement(systemRef);
+      setCurrentViewId(Views.SYSTEM);
     }
     if (fatal) {
-      scrollToElement(homeRef);
+      setCurrentViewId(Views.HOME);
     }
   }
+
+  useEffect(() => {
+    console.log(`scrolled to element, current view is ${currentViewId}`)
+    scrollToElement(RefIDs[currentViewId])
+  }, [currentViewId])
+
+  const handleResize = () => {
+    console.log(`resize event called, current view is ${currentViewId}`)
+    scrollToElement(RefIDs[currentViewId]);
+  }
+
   useEffect(() => {
     WebRtcClient.on('CONNECTED', onConnected)
     WebRtcClient.on('DISCONNECT', onCloseComplete)
@@ -55,9 +81,16 @@ function App() {
       WebRtcClient.off('CONNECTED', onConnected)
       WebRtcClient.off('DISCONNECT', onCloseComplete)
       WebRtcClient.off('CONNECTION_STATUS_MESSAGE', onConnectionStatusMsg)
-
     }
   }, [])
+
+  useEffect(() => {
+    console.log("resize useEffect called")
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [handleResize])
 
   return (
     <Fragment>
