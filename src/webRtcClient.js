@@ -34,6 +34,7 @@ class Client extends EventEmitter {
 
         this.handleConnectionStateChange = this.handleConnectionStateChange.bind(this);
         this.handleIceCandidate = this.handleIceCandidate.bind(this);
+        this.handleDataChannelMessage = this.handleDataChannelMessage.bind(this);
 
         this.sendChatMessage = this.sendChatMessage.bind(this);
         this.sendDataChannelMessage = this.sendDataChannelMessage.bind(this);
@@ -57,11 +58,7 @@ class Client extends EventEmitter {
         this.dataChannel.onopen = () => {
             console.log('dataChannel has opened')
         }
-        this.dataChannel.onmessage = (e) => {
-            console.log("Einav - ", e.data);
-
-            this.emit('MESSAGE', e.data);
-        }
+        this.dataChannel.onmessage = this.handleDataChannelMessage
         this.dataChannel.onclose = () => console.log('dataChannel has closed')
 
         this.peerConnection.onconnectionstatechange = this.handleConnectionStateChange
@@ -192,6 +189,34 @@ class Client extends EventEmitter {
                 this.getAnswer(connectionId);
             }
         }
+    }
+
+    handleDataChannelMessage(event) {
+        const { data } = event
+        if (!data) {
+            return
+        }
+        let isJson = false
+        let jsonData = null
+        try {
+            jsonData = JSON.parse(data.toString())
+            isJson = true
+        } catch (e) { }
+
+        if (!isJson) {
+            return
+        }
+        const { result } = jsonData;
+        if (!result) {
+            return
+        }
+        const { message, height, width } = result
+        if (!message || !height || !width) {
+            return
+        }
+        result.id = new Date().getTime()
+
+        this.emit('DATA_CHANNEL_MESSAGE', result);
     }
 
     sendChatMessage(message, width, height, duration = 4000) {

@@ -3,7 +3,7 @@ import './App.css';
 import Home from './Home'
 import System from './System'
 import User from './User'
-import { Chat, addMessageToHistory } from './Chat'
+import Chat from './Chat'
 import Header from './Header';
 import Close from './Close';
 import WebRtcClient from './webRtcClient';
@@ -47,16 +47,12 @@ function App() {
   const onUserDataComplete = () => {
     setCurrentViewId(Views.CHAT)
   }
-  const onDatachannelMsg = (msg) => {
-    addMessageToHistory(msg)
-  }
   const onCloseComplete = () => {
     setCurrentViewId(Views.HOME)
     setConnectionClosed(true)
   }
   const onConnected = () => {
     setCurrentViewId(Views.USER)
-    WebRtcClient.on('MESSAGE', onDatachannelMsg)
   }
   const onConnectionStatusMsg = ({ interrupt, fatal }) => {
     if (interrupt) {

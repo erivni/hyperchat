@@ -1,15 +1,17 @@
 import html2canvas from 'html2canvas';
-import React, { forwardRef, useEffect, useState } from 'react'
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import { useUserData } from './UserData';
 import WebRtcClient from "./webRtcClient";
 
 const DEFAULT_MESSAGE = "your message will appear here!"
 const MAX_MESSAGES = 10;
 
-export const Chat = forwardRef((props, ref) => {
+const Chat = forwardRef((props, ref) => {
     const { connectionClosed } = props
+    const historyRef = useRef(null)
     const [userData] = useUserData()
     const [message, setMessage] = useState(DEFAULT_MESSAGE);
+    const [historyMsgs, setHistoryMsgs] = useState([]);
 
     const sendMessage = () => {
         if (!message || message === DEFAULT_MESSAGE) return;
@@ -22,6 +24,29 @@ export const Chat = forwardRef((props, ref) => {
             WebRtcClient.sendChatMessage(info, canvas.width, canvas.height)
         });
     }
+
+    const handleNewMessage = (newMsg) => {
+        setHistoryMsgs(prev => {
+            let newMsgArray = [...prev, newMsg]
+            if (newMsgArray.length > MAX_MESSAGES) {
+                newMsgArray = newMsgArray.slice(newMsgArray.length - MAX_MESSAGES)
+            }
+            return newMsgArray
+        })
+    }
+    useEffect(() => {
+        if (!historyRef || !historyRef.current) {
+            return
+        }
+        historyRef.current.scrollTop = historyRef.current.scrollHeight
+    }, [historyMsgs])
+
+    useEffect(() => {
+        WebRtcClient.on('DATA_CHANNEL_MESSAGE', handleNewMessage)
+        return () => {
+            WebRtcClient.off('DATA_CHANNEL_MESSAGE', handleNewMessage)
+        }
+    }, [])
 
     useEffect(() => {
         if (connectionClosed) {
@@ -42,7 +67,8 @@ export const Chat = forwardRef((props, ref) => {
     }
     return (
         <div ref={ref} className="screen m-screen">
-            <div id="history" ref={ref} className="history">
+            <div id="history" ref={historyRef} className="history" >
+                {historyMsgs.map((msg) => <HistoryMessage key={msg.id} {...msg} />)}
             </div >
             <div id="message-bubble" className="message bubble">
                 <p className='profile-image'><img alt='profile' src={userData?.profileImage} /></p>
@@ -59,30 +85,12 @@ export const Chat = forwardRef((props, ref) => {
     )
 })
 
-export const  addMessageToHistory = (msg) => {
-        let history = document.getElementById("history");
-        let newChatMsg = document.createElement("img");
-        let message = JSON.parse(msg);
-
-        if (!message || !message?.result || !message.result.message || !message.result.height || !message.result.width) {
-            // ignore malformed message
-            return
-        }
-
-        newChatMsg.className = "history-message";
-        newChatMsg.src = "data:image/png;base64," + message.result.message;
-        newChatMsg.height = message.result.height * 0.4;
-        newChatMsg.width = message.result.width * 0.4;
-        newChatMsg.opacity = 0.4;
-        history.appendChild(newChatMsg);
-
-        let oldMessages = document.getElementById("history").children;
-        if (oldMessages.length > MAX_MESSAGES) {
-            debugger
-            for (let i=0; i< oldMessages.length-MAX_MESSAGES; i++) {
-                history.removeChild(oldMessages[i]);
-            }
-        }
-
-        history.scrollTop = history.scrollHeight;
+const HistoryMessage = ({ width, height, message }) => {
+    const src = `data:image/png;base64,${message}`
+    const imgHeight = height * 0.4
+    const imgWidth = width * 0.4
+    const opacity = 0.4
+    return <img className='history-message' src={src} width={imgWidth} height={imgHeight} opacity={opacity}></img>
 }
+
+export default Chat
