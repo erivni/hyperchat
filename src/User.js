@@ -21,6 +21,7 @@ const User = forwardRef((props, ref) => {
   
   return (
     <div ref={ref} className="screen f-screen">
+      <p>You are chatting as</p>
       <Capture close={done || connectionClosed} onPictureCaptured={(pictureData) => picture = pictureData} />
       <form onSubmit={onFormSubmitted}>
         <input name="username" type="text" placeholder='enter your name here' defaultValue={userData?.username} />
