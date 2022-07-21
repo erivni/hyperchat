@@ -27,9 +27,9 @@ const Chat = forwardRef((props, ref) => {
 
     const handleNewMessage = (newMsg) => {
         setHistoryMsgs(prev => {
-            let newMsgArray = [...prev, newMsg]
+            let newMsgArray = [newMsg,...prev]
             if (newMsgArray.length > MAX_MESSAGES) {
-                newMsgArray = newMsgArray.slice(newMsgArray.length - MAX_MESSAGES)
+                newMsgArray = newMsgArray.slice(0, MAX_MESSAGES - newMsgArray.length)
             }
             return newMsgArray
         })
@@ -38,7 +38,6 @@ const Chat = forwardRef((props, ref) => {
         if (!historyRef || !historyRef.current) {
             return
         }
-        historyRef.current.scrollTop = historyRef.current.scrollHeight
     }, [historyMsgs])
 
     useEffect(() => {

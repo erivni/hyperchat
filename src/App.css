@@ -103,10 +103,12 @@ form input[type="checkbox"] {
   width: auto;
   height: 30%;
   padding: 3%;
+  transform: rotate(180deg);
 }
 
 .history-message {
-  display: block;
+  display: table-cell;
+  transform: rotate(180deg);
 }
 
 .bubble {
