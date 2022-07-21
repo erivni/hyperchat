@@ -77,7 +77,7 @@ const Chat = forwardRef((props, ref) => {
                 </div>
             </div>
             <form onSubmit={onFormSubmitted} style={{ flexDirection: "row" }}>
-                <input name="message" type="text" onChange={onMessageChange} />
+                <input name="message" type="text" onChange={onMessageChange} autoComplete="off"/>
                 <label><input type="submit" hidden /><i className="fa-solid fa-paper-plane"></i></label>
             </form>
         </div >
