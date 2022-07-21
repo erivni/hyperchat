@@ -88,7 +88,7 @@ export default function Capture({ onPictureCaptured, close }) {
     return (
         <div>
             <div className="camera" style={{ height: containerHeightPx }}>
-                <video hidden={!inEditMode} width={width} height={height} ref={ref => videoRef = ref} id="video" onCanPlay={videoStreamStart}>Video stream not available.</video>
+                <video hidden={!inEditMode} width={width} height={height} ref={ref => videoRef = ref} id="video" onCanPlay={videoStreamStart} playsInline="true">Video stream not available.</video>
                 <div hidden={inEditMode} className='profile-image' style={{ height: profileSizePx, width: profileSizePx }} >
                     <img alt='profile image' src={imageSrc} />
                 </div>
