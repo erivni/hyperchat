@@ -3,15 +3,14 @@ import useLocalStorage from "./localStorage";
 const localStorageUsernameKey = 'username'
 
 const colors = [
-    "#6c09e880",
     "#91ffff80",
-    "#4df30c80",
-    "#155aea80",
-    "#ef3a0480",
-    "#fff09180",
-    "#ff91ae80",
-    "#d791ff80",
+    "#7aadef80",
+    "#f1ba6280",
     "#c8ff9180",
+    "#fff09180",
+    "#f68e6f80",
+    "#ff91ae80",    
+    "#d791ff80",
 ]
 
 
